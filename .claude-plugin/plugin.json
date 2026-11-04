@@ -1,6 +1,6 @@
 {
   "name": "trader-india",
-  "description": "9 Claude skills for NSE/BSE day trading research: scan for setups, track filings, time every entry and exit, replay the odds, size the position, check it against your own risk rules, and get a plain-language order ticket to enter yourself. Paper/manual only -- no live broker integration of any kind.",
+  "description": "10 Claude skills for NSE/BSE day trading research: scan for setups, rank the breakouts you could still enter, track filings, time every entry and exit, replay the odds, size the position, check it against your own risk rules, and get a plain-language order ticket to enter yourself. Paper/manual only -- no live broker integration of any kind.",
   "version": "1.0.0",
   "author": {
     "name": "Pulkit Garg",

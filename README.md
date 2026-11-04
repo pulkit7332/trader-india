@@ -51,7 +51,13 @@ trader-scanner  ->  trader-news  ->  trader-entry  ->  trader-exit  ->  trader-t
    app. **This pack has no live broker integration of any kind.**
 9. **trader-alerts** — price/stop/target/flat-by-close/opening-bell alerts
    from the same free Yahoo data, computed in IST.
-10. There is **no Pelosi-tracker equivalent** (no comparable Indian
+10. **trader-top** — a shortcut through stages 1–5: rescans for
+   opening-range breakouts, keeps the ones still holding above their range
+   with a stop within 3%, scores them on the day's move plus a fresh NSE
+   filing, runs the exit planner and the time machine on the best 10, and
+   ranks them by average R. One fixed, printed rule, rerun fresh each time.
+   You still pick.
+11. There is **no Pelosi-tracker equivalent** (no comparable Indian
     disclosure regime for legislators' trades) and **no earnings-analyst
     equivalent** (no Indian EDGAR-style structured, machine-readable filing
     API — see trader-news's `SKILL.md` for why a weaker version was not
