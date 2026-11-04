@@ -27,6 +27,12 @@ skills would print):
      counts the replays that hit neither side at their cutoff price, so it
      still means something late in the day), then target-first odds.
 
+Breadth: the share of scanned charts up on the day (the scanner's
+advancers / decliners, at the pinned clock). At BROAD_UP or more the
+replays, drawn from ~60 ordinary sessions, tend to understate how far
+breakouts run, so the order means less; at BROAD_DOWN or less every long
+breakout is fighting the whole market. Both print a warning.
+
 A rank is the output of that rule, not a recommendation. Long side only.
 """
 
@@ -50,6 +56,8 @@ DEFAULT_FLAT_BY = "15:15"
 FILING_TAGS = ("earnings", "corporate-action", "deal")
 WARNING_TAGS = ("halt", "risk", "regulatory")
 FILING_BONUS = 2.0
+BROAD_UP = 70.0    # % of charts up on the day
+BROAD_DOWN = 30.0
 
 NSE_HOLIDAYS = {
     "2026-01-26", "2026-02-19", "2026-03-31", "2026-04-02", "2026-04-10", "2026-04-14",
@@ -220,6 +228,8 @@ def cmd_top(a):
         raise TopError("it is %s IST, at or after flat-by %s; too late to rank new entries today" % (hhmm, a.flat_by))
 
     wl = load_watchlist(a, local)
+    adv, dec = wl.get("advancers"), wl.get("decliners")
+    breadth = round(adv / (adv + dec) * 100, 1) if adv is not None and adv + dec else None
     hits = wl.get("hits", [])
     if not hits:
         raise TopError("no chart closed above its opening range (%d usable)" % wl.get("usable", 0))
@@ -288,6 +298,7 @@ def cmd_top(a):
                     "tm_top": a.tm_top, "stop": "or-mid", "target": "2R", "flat_by": a.flat_by,
                     "replays": a.replays, "seed": a.seed},
            "scan": {k: wl.get(k) for k in ("universe", "scanned", "failed", "candidates", "confirmed_checked", "usable")},
+           "breadth": {"advancers": adv, "decliners": dec, "up_pct": breadth},
            "breakouts": len(hits), "dropped": dropped, "holding": len(pool), "ranked": ranked,
            "skipped": skipped, "news_errors": news_errors}
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -304,6 +315,14 @@ def cmd_top(a):
           "%d stop too wide, %d under ₹%g, %d no price)."
           % (hhmm, len(pool), a.max_risk_pct, dropped["back_in_range"], dropped["stop_too_wide"],
              dropped["under_min_price"], a.min_price, dropped["no_price"]))
+    if breadth is not None:
+        print("Breadth: %.0f%% of %d charts up on the day (%d up, %d down)." % (breadth, adv + dec, adv, dec))
+        if breadth >= BROAD_UP:
+            print("  ! Broad up day. The replays come from ~60 ordinary sessions and tend to understate how far "
+                  "breakouts run on a day like this; the rank order means less than usual.")
+        elif breadth <= BROAD_DOWN:
+            print("  ! Broad down day. Every long breakout here is fighting the whole market; the replays may "
+                  "overstate its odds.")
     if not ranked:
         print("Nothing was replayed.")
     else:

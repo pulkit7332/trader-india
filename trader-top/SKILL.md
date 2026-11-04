@@ -57,6 +57,22 @@ Late in the session almost every replay hits neither side, so
 target-first odds stop telling the charts apart. The script prints a
 warning when most replays hit neither side.
 
+## Breadth
+
+Every run also prints how many of the scanned charts are up on the day.
+The scanner counts them at the scan time, so `--now` gets the breadth as
+it was then. The count changes how much the ranking can be trusted:
+
+| up on the day | what it prints | why |
+| --- | --- | --- |
+| 70% or more | `! Broad up day` | The replays come from ~60 ordinary sessions. On a day when the whole market trends, they understate how far breakouts run, and the rank order means less. On 2026-11-04, 11 of the 30 charts ranked at 09:45, 10:30 and 12:00 hit their 2R target, even though the replays gave them 0-16%. The bottom-ranked chart did as well as the top one. |
+| 30% or less | `! Broad down day` | Every long breakout is fighting the whole market, so the replays may overstate its odds. |
+
+These thresholds are fixed (`BROAD_UP`, `BROAD_DOWN` in `top.py`): 70% up is
+roughly a 2.3:1 advance/decline day. On 2026-11-04 the breadth at 09:45 was
+72% (1,400 up, 535 down). The cutoffs come from one session, not a study, so treat the warning as a prompt to look at
+the market before trusting the table.
+
 ## When it runs
 
 NSE trading days only. It runs from 09:30 IST, once the 15-minute range has
@@ -70,7 +86,7 @@ clipped to bars that had closed by then.
 | file | what |
 | --- | --- |
 | `trader_in/watchlist.json` | written by the scanner on a rescan, or read with `--no-rescan` (must be today's `orb` scan) |
-| `trader_in/top.json` | `as_of`, the `rule`, the scan counts, how many were dropped and why, `ranked[]` (symbol, price, stop, target, risk %, fast score, filing tags, the Time Machine's `mc`, `history` and `verdict`), `skipped`, `news_errors` |
+| `trader_in/top.json` | `as_of`, the `rule`, the scan counts, `breadth` (advancers, decliners, `up_pct`), how many were dropped and why, `ranked[]` (symbol, price, stop, target, risk %, fast score, filing tags, the Time Machine's `mc`, `history` and `verdict`), `skipped`, `news_errors` |
 
 It does not write `plan.json`. The user picks a chart and then runs
 `/trader-exit` for it, the normal way.
@@ -79,7 +95,8 @@ It does not write `plan.json`. The user picks a chart and then runs
 
 1. Run `top.py`. Tell the user the funnel in one line: breakouts, how many
    still hold, and how many were dropped (back in range, stop too wide,
-   under ₹20).
+   under ₹20). Then the breadth line, and say any broad-day warning
+   before the table, not after it.
 2. Show the ranked table as it is. Give the reason for each column the
    first time (target / stop / neither are replay odds, history is
    `fired: target/stop/neither` on real past sessions).

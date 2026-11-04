@@ -52,7 +52,7 @@ found something, 1 when it found nothing or could not run.
 | file | what |
 | --- | --- |
 | `trader_in/universe.txt` | written by `universe`: one `SYMBOL\|Name` a line (bare NSE symbol, no `.NS`), read by `daily` and `orb` |
-| `trader_in/watchlist.json` | written by `daily` and `orb`: `mode`, `as_of`, `universe`, `scanned`, `failed`, `hits[]`. trader-news and trader-entry read `hits[].symbol` |
+| `trader_in/watchlist.json` | written by `daily` and `orb`: `mode`, `as_of`, `universe`, `scanned`, `failed`, `hits[]`; `orb` also writes `advancers` and `decliners` (scanned charts above / below yesterday's close at the scan time, for trader-top's breadth check). trader-news and trader-entry read `hits[].symbol` |
 
 Symbols in every file are bare NSE tickers (`RELIANCE`, not `RELIANCE.NS`);
 every script in this pack appends `.NS` for a Yahoo lookup unless you give it

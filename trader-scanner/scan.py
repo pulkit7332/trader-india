@@ -434,6 +434,7 @@ def cmd_orb(a):
         syms = syms[: a.limit]
 
     scanned, failed, candidates = 0, 0, []
+    advancers, decliners = 0, 0
     batch = 20
     for i in range(0, len(syms), batch):
         chunk = [yahoo_symbol(s) for s in syms[i:i + batch]]
@@ -461,6 +462,12 @@ def cmd_orb(a):
                 failed += 1
                 continue
             scanned += 1
+            prev_close = resp.get("meta", {}).get("chartPreviousClose")
+            if prev_close:
+                if closes[-1] > prev_close:
+                    advancers += 1
+                elif closes[-1] < prev_close:
+                    decliners += 1
             range_high = max(closes[:n_range])
             post = closes[n_range:]
             if any(c >= range_high for c in post):
@@ -512,7 +519,8 @@ def cmd_orb(a):
     confirmed.sort(key=lambda c: c["time"])
     doc = {"mode": "orb", "as_of": local.strftime("%Y-%m-%d %H:%M IST"), "or_minutes": a.or_minutes,
            "universe": len(syms), "scanned": scanned, "failed": failed, "candidates": len(candidates),
-           "confirmed_checked": len(to_confirm), "usable": usable, "hits": confirmed}
+           "confirmed_checked": len(to_confirm), "usable": usable,
+           "advancers": advancers, "decliners": decliners, "hits": confirmed}
     if not a.no_write:
         os.makedirs(DATA_DIR, exist_ok=True)
         with open(os.path.join(DATA_DIR, "watchlist.json"), "w", encoding="utf-8") as fh:
